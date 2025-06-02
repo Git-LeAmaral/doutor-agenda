@@ -2,7 +2,7 @@ import { DialogTitle } from "@radix-ui/react-dialog";
 
 import { Dialog, DialogContent, DialogDescription, DialogHeader } from "@/components/ui/dialog";
 
-import ClinicForm from "./components/form";
+import ClinicForm from "./_components/form";
 
 
 const ClinicFormPage = () => {
