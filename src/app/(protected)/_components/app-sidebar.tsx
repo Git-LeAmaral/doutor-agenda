@@ -96,8 +96,8 @@ export function AppSidebar() {
                     <AvatarFallback>Leandro</AvatarFallback>
                   </Avatar>
                   <div>
-                    <p className="text-m">{session.data?.user.clinic.name}</p>
-                    <p className="text-sm text-muted-foreground">{session.data?.user.email}</p>
+                    <p className="text-m">{session.data?.user?.clinic?.name}</p>
+                    <p className="text-sm text-muted-foreground">{session.data?.user?.email}</p>
                   </div>
                 </SidebarMenuButton>
               </DropdownMenuTrigger>
