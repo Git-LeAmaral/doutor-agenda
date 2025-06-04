@@ -23,31 +23,43 @@ import { Input } from "@/components/ui/input";
 import {
   Select,
   SelectContent,
+  SelectGroup,
   SelectItem,
+  SelectLabel,
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
 
 import { medicalSpecialties } from "../_constants";
 
-const formSchema = z.object({
-  name: z.string().trim().min(1, { message: "Nome é obrigatório" }),
-  specialty: z
-    .string()
-    .trim()
-    .min(1, { message: "Especialidade é obrigatória" }),
-  appointmentPrice: z
-    .number()
-    .min(1, { message: "Preço da consulta é obrigatório" }),
-  availableFromWeekdays: z.string(),
-  availableToWeekDays: z.string(),
-  availableFromTime: z
-    .string()
-    .min(1, { message: "Horário de início é obrigatório" }),
-  availableToTime: z
-    .string()
-    .min(1, { message: "Horário de término é obrigatório" }),
-});
+const formSchema = z
+  .object({
+    name: z.string().trim().min(1, { message: "Nome é obrigatório" }),
+    specialty: z
+      .string()
+      .trim()
+      .min(1, { message: "Especialidade é obrigatória" }),
+    appointmentPrice: z
+      .number()
+      .min(1, { message: "Preço da consulta é obrigatório" }),
+    availableFromWeekdays: z.string(),
+    availableToWeekDays: z.string(),
+    availableFromTime: z
+      .string()
+      .min(1, { message: "Horário de início é obrigatório" }),
+    availableToTime: z
+      .string()
+      .min(1, { message: "Horário de término é obrigatório" }),
+  })
+  .refine(
+    (data) => {
+      return data.availableFromTime < data.availableToTime;
+    },
+    {
+      message: "Horário de início deve ser menor que o horário de término",
+      path: ["availableToTime"],
+    },
+  );
 
 const UpsertDoctorForm = () => {
   const form = useForm<z.infer<typeof formSchema>>({
@@ -178,27 +190,91 @@ const UpsertDoctorForm = () => {
 
           <FormField
             control={form.control}
-            name="availableToWeekDays"
+            name="availableFromTime"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Dia de término de atendimento</FormLabel>
+                <FormLabel>Horário de início de atendimento</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
-                      <SelectValue placeholder="Selecione o dia de término de atendimento" />
+                      <SelectValue placeholder="Selecione o horário de início de atendimento" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="0">Domingo</SelectItem>
-                    <SelectItem value="1">Segunda-feira</SelectItem>
-                    <SelectItem value="2">Terça-feira</SelectItem>
-                    <SelectItem value="3">Quarta-feira</SelectItem>
-                    <SelectItem value="4">Quinta-feira</SelectItem>
-                    <SelectItem value="5">Sexta-feira</SelectItem>
-                    <SelectItem value="6">Sábado</SelectItem>
+                    <SelectGroup>
+                      <SelectLabel>Horários da Manhã</SelectLabel>
+                      <SelectItem value="08:00:00">08:00</SelectItem>
+                      <SelectItem value="09:00:00">09:00</SelectItem>
+                      <SelectItem value="10:00:00">10:00</SelectItem>
+                      <SelectItem value="11:00:00">11:00</SelectItem>
+                      <SelectItem value="12:00:00">12:00</SelectItem>
+                    </SelectGroup>
+                    <SelectGroup>
+                      <SelectLabel>Horários da Tarde</SelectLabel>
+                      <SelectItem value="13:00:00">13:00</SelectItem>
+                      <SelectItem value="14:00:00">14:00</SelectItem>
+                      <SelectItem value="15:00:00">15:00</SelectItem>
+                      <SelectItem value="16:00:00">16:00</SelectItem>
+                      <SelectItem value="17:00:00">17:00</SelectItem>
+                    </SelectGroup>
+                    <SelectGroup>
+                      <SelectLabel>Horários da Noite</SelectLabel>
+                      <SelectItem value="18:00:00">18:00</SelectItem>
+                      <SelectItem value="19:00:00">19:00</SelectItem>
+                      <SelectItem value="20:00:00">20:00</SelectItem>
+                      <SelectItem value="21:00:00">21:00</SelectItem>
+                      <SelectItem value="22:00:00">22:00</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <FormField
+            control={form.control}
+            name="availableToTime"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Horário de término de atendimento</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione o horário de término de atendimento" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectLabel>Horários da Manhã</SelectLabel>
+                      <SelectItem value="08:00:00">08:00</SelectItem>
+                      <SelectItem value="09:00:00">09:00</SelectItem>
+                      <SelectItem value="10:00:00">10:00</SelectItem>
+                      <SelectItem value="11:00:00">11:00</SelectItem>
+                      <SelectItem value="12:00:00">12:00</SelectItem>
+                    </SelectGroup>
+                    <SelectGroup>
+                      <SelectLabel>Horários da Tarde</SelectLabel>
+                      <SelectItem value="13:00:00">13:00</SelectItem>
+                      <SelectItem value="14:00:00">14:00</SelectItem>
+                      <SelectItem value="15:00:00">15:00</SelectItem>
+                      <SelectItem value="16:00:00">16:00</SelectItem>
+                      <SelectItem value="17:00:00">17:00</SelectItem>
+                    </SelectGroup>
+                    <SelectGroup>
+                      <SelectLabel>Horários da Noite</SelectLabel>
+                      <SelectItem value="18:00:00">18:00</SelectItem>
+                      <SelectItem value="19:00:00">19:00</SelectItem>
+                      <SelectItem value="20:00:00">20:00</SelectItem>
+                      <SelectItem value="21:00:00">21:00</SelectItem>
+                      <SelectItem value="22:00:00">22:00</SelectItem>
+                    </SelectGroup>
                   </SelectContent>
                 </Select>
                 <FormMessage />
