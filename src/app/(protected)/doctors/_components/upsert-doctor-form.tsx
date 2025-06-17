@@ -8,6 +8,7 @@ import z from "zod";
 import { upsertDoctor } from "@/actions/upsert-doctor";
 import { Button } from "@/components/ui/button";
 import {
+  DialogContent,
   DialogDescription,
   DialogFooter,
   DialogHeader,
@@ -101,7 +102,7 @@ const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
   };
 
   return (
-    <>
+    <DialogContent>
       <DialogHeader>
         <DialogTitle>Adicionar Médico</DialogTitle>
         <DialogDescription>
@@ -184,7 +185,7 @@ const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
             name="availableFromWeekdays"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Dias de atendimento</FormLabel>
+                <FormLabel>Dia de início de atendimento</FormLabel>
                 <Select
                   onValueChange={field.onChange}
                   defaultValue={field.value}
@@ -192,6 +193,36 @@ const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
                   <FormControl>
                     <SelectTrigger className="w-full">
                       <SelectValue placeholder="Selecione os dias de atendimento" />
+                    </SelectTrigger>
+                  </FormControl>
+                  <SelectContent>
+                    <SelectItem value="0">Domingo</SelectItem>
+                    <SelectItem value="1">Segunda-feira</SelectItem>
+                    <SelectItem value="2">Terça-feira</SelectItem>
+                    <SelectItem value="3">Quarta-feira</SelectItem>
+                    <SelectItem value="4">Quinta-feira</SelectItem>
+                    <SelectItem value="5">Sexta-feira</SelectItem>
+                    <SelectItem value="6">Sábado</SelectItem>
+                  </SelectContent>
+                </Select>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+<FormField
+            control={form.control}
+            name="availableToWeekDays"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Dia de término de atendimento</FormLabel>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <FormControl>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Selecione o dia de término de atendimento" />
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
@@ -310,7 +341,7 @@ const UpsertDoctorForm = ({ onSuccess }: UpsertDoctorFormProps) => {
           </DialogFooter>
         </form>
       </Form>
-    </>
+    </DialogContent>
   );
 };
 
