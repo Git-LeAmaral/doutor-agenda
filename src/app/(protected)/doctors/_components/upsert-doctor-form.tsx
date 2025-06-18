@@ -60,8 +60,8 @@ const formSchema = z
     appointmentPrice: z
       .number()
       .min(1, { message: "Preço da consulta é obrigatório" }),
-    availableFromWeekdays: z.string(),
-    availableToWeekDays: z.string(),
+    availableFromWeekDay: z.string(),
+    availableToWeekDay: z.string(),
     availableFromTime: z
       .string()
       .min(1, { message: "Horário de início é obrigatório" }),
@@ -93,8 +93,8 @@ const UpsertDoctorForm = ({doctor, onSuccess, isOpen }: UpsertDoctorFormProps) =
       name: doctor?.name ?? "",
       specialty: doctor?.specialty ?? "",
       appointmentPrice: doctor?.appointmentPriceInCents ? doctor.appointmentPriceInCents / 100 : 0,
-      availableFromWeekdays: doctor?.availableFromWeekDay.toString() ?? "1",
-      availableToWeekDays: doctor?.availableToWeekDay.toString() ?? "5",
+      availableFromWeekDay: doctor?.availableFromWeekDay.toString() ?? "1",
+      availableToWeekDay: doctor?.availableToWeekDay.toString() ?? "5",
       availableFromTime: doctor?.availableFromTime ?? "",
       availableToTime: doctor?.availableToTime ?? "",
     },
@@ -106,8 +106,8 @@ const UpsertDoctorForm = ({doctor, onSuccess, isOpen }: UpsertDoctorFormProps) =
         name: doctor?.name ?? "",
         specialty: doctor?.specialty ?? "",
         appointmentPrice: doctor?.appointmentPriceInCents ? doctor.appointmentPriceInCents / 100 : 0,
-        availableFromWeekdays: doctor?.availableFromWeekDay.toString() ?? "1",
-        availableToWeekDays: doctor?.availableToWeekDay.toString() ?? "5",
+        availableFromWeekDay: doctor?.availableFromWeekDay.toString() ?? "1",
+        availableToWeekDay: doctor?.availableToWeekDay.toString() ?? "5",
         availableFromTime: doctor?.availableFromTime ?? "",
         availableToTime: doctor?.availableToTime ?? "",
       })
@@ -145,8 +145,8 @@ const UpsertDoctorForm = ({doctor, onSuccess, isOpen }: UpsertDoctorFormProps) =
     upsertDoctorAction.execute({
       ...values,
       id: doctor?.id,
-      availableFromWeekdays: parseInt(values.availableFromWeekdays),
-      availableToWeekDays: parseInt(values.availableToWeekDays),
+      availableFromWeekDay: parseInt(values.availableFromWeekDay),
+      availableToWeekDay: parseInt(values.availableToWeekDay),
       appointmentPriceInCents: values.appointmentPrice * 100,
     });
   };
@@ -232,7 +232,7 @@ const UpsertDoctorForm = ({doctor, onSuccess, isOpen }: UpsertDoctorFormProps) =
 
           <FormField
             control={form.control}
-            name="availableFromWeekdays"
+            name="availableFromWeekDay"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Dia de início de atendimento</FormLabel>
@@ -262,7 +262,7 @@ const UpsertDoctorForm = ({doctor, onSuccess, isOpen }: UpsertDoctorFormProps) =
 
 <FormField
             control={form.control}
-            name="availableToWeekDays"
+            name="availableToWeekDay"
             render={({ field }) => (
               <FormItem>
                 <FormLabel>Dia de término de atendimento</FormLabel>

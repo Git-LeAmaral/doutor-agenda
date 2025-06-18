@@ -1,8 +1,10 @@
 "use client";
 
 import { zodResolver } from "@hookform/resolvers/zod";
+import { useQuery } from "@tanstack/react-query";
 import { format } from "date-fns";
 import { ptBR } from "date-fns/locale";
+import dayjs from "dayjs";
 import { CalendarIcon } from "lucide-react";
 import { useAction } from "next-safe-action/hooks";
 import { useEffect } from "react";
@@ -12,6 +14,7 @@ import { toast } from "sonner";
 import z from "zod";
 
 import { addAppointment } from "@/actions/add-appointment";
+import { getAvailableTimes } from "@/actions/get-available-times";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -73,8 +76,21 @@ const AddAppointmentForm = ({
     },
   });
 
-  const watchedPatientId = form.watch("patientId");
-  const watchedDoctorId = form.watch("doctorId");
+  const selectedPatientId = form.watch("patientId");
+  const selectedDoctorId = form.watch("doctorId");
+  const selectedDate = form.watch("date");
+
+  const { data: availableTimes, isLoading: isLoadingTimes } = useQuery({
+    queryKey: ["available-times", selectedDate, selectedDoctorId],
+    queryFn: async () => {
+      const result = await getAvailableTimes({
+        date: dayjs(selectedDate).format("YYYY-MM-DD"),
+        doctorId: selectedDoctorId, 
+      });
+      return result?.data || [];
+    },
+    enabled: !!(selectedDate && selectedDoctorId), // Só executa se tiver data e médico
+  })
 
   useEffect(() => {
     if (isOpen) {
@@ -90,16 +106,16 @@ const AddAppointmentForm = ({
 
   // Atualiza o valor da consulta quando o médico é selecionado
   useEffect(() => {
-    if (watchedDoctorId) {
+    if (selectedDoctorId) {
       const selectedDoctor = doctors.find(
-        (doctor) => doctor.id === watchedDoctorId,
+        (doctor) => doctor.id === selectedDoctorId,
       );
 
       if (selectedDoctor) {
         form.setValue("appointmentPrice", selectedDoctor.appointmentPriceInCents / 100);
       }
     }
-  }, [watchedDoctorId, doctors, form]);
+  }, [selectedDoctorId, doctors, form]);
 
   const addAppointmentAction = useAction(addAppointment, {
     onSuccess: () => {
@@ -118,7 +134,7 @@ const AddAppointmentForm = ({
     })
   };
 
-  const isDateTimeEnabled = watchedPatientId && watchedDoctorId;
+  const isDateTimeEnabled = selectedPatientId && selectedDoctorId;
 
   return (
     <DialogContent className="max-w-md">
@@ -197,7 +213,7 @@ const AddAppointmentForm = ({
                     decimalScale={2}
                     fixedDecimalScale
                     allowNegative={false}
-                    disabled={!watchedDoctorId}
+                    disabled={!selectedDoctorId}
                     onValueChange={(values) => {
                       field.onChange(values.floatValue || 0);
                     }}
@@ -257,7 +273,7 @@ const AddAppointmentForm = ({
                 <Select 
                   onValueChange={field.onChange} 
                   value={field.value}
-                  disabled={!isDateTimeEnabled}
+                  disabled={!isDateTimeEnabled || !selectedDate}
                 >
                   <FormControl>
                     <SelectTrigger className="w-full">
@@ -265,19 +281,25 @@ const AddAppointmentForm = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="08:00">08:00</SelectItem>
-                    <SelectItem value="09:00">09:00</SelectItem>
-                    <SelectItem value="10:00">10:00</SelectItem>
-                    <SelectItem value="11:00">11:00</SelectItem>
-                    <SelectItem value="12:00">12:00</SelectItem>
-                    <SelectItem value="13:00">13:00</SelectItem>
-                    <SelectItem value="14:00">14:00</SelectItem>
-                    <SelectItem value="15:00">15:00</SelectItem>
-                    <SelectItem value="16:00">16:00</SelectItem>
-                    <SelectItem value="17:00">17:00</SelectItem>
-                    <SelectItem value="18:00">18:00</SelectItem>
-                    <SelectItem value="19:00">19:00</SelectItem>
-                    <SelectItem value="20:00">20:00</SelectItem>
+                    {isLoadingTimes ? (
+                      <div className="py-2 px-2 text-sm text-muted-foreground text-center">
+                        Carregando horários...
+                      </div>
+                    ) : availableTimes && availableTimes.length > 0 ? (
+                      availableTimes.map((time) => (
+                        <SelectItem 
+                          key={time.value} 
+                          value={time.label}
+                          disabled={!time.available}
+                        >
+                          {time.value.slice(0, 5)} {!time.available && "(Ocupado)"}
+                        </SelectItem>
+                      ))
+                    ) : selectedDate && selectedDoctorId ? (
+                      <div className="py-2 px-2 text-sm text-muted-foreground text-center">
+                        Nenhum horário disponível
+                      </div>
+                    ) : null}
                   </SelectContent>
                 </Select>
                 <FormMessage />

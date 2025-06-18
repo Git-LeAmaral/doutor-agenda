@@ -49,16 +49,20 @@ export const upsertDoctor = actionClient
         specialty: parsedInput.specialty,
         availableFromTime: availableFromTimeUTC.format("HH:mm:ss"),
         availableToTime: availableToTimeUTC.format("HH:mm:ss"),
-        availableFromWeekDay: parsedInput.availableFromWeekdays,
-        availableToWeekDay: parsedInput.availableToWeekDays,
+        availableFromWeekDay: parsedInput.availableFromWeekDay,
+        availableToWeekDay: parsedInput.availableToWeekDay,
         appointmentPriceInCents: parsedInput.appointmentPriceInCents,
       })
       .onConflictDoUpdate({
         target: [doctorsTable.id],
         set: {
-          ...parsedInput,
+          name: parsedInput.name,
+          specialty: parsedInput.specialty,
           availableFromTime: availableFromTimeUTC.format("HH:mm:ss"),
           availableToTime: availableToTimeUTC.format("HH:mm:ss"),
+          availableFromWeekDay: parsedInput.availableFromWeekDay,
+          availableToWeekDay: parsedInput.availableToWeekDay,
+          appointmentPriceInCents: parsedInput.appointmentPriceInCents,
         },
       });
       revalidatePath("/doctors");
