@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Dialog, DialogTrigger } from "@/components/ui/dialog";
 import { doctorsTable, patientsTable } from "@/db/schema";
 
-import UpsertAppointmentForm from "./upsert-appointment-form";
+import AddAppointmentForm from "./add-appointment-form";
 
 interface AddAppointmentButtonProps {
   doctors: (typeof doctorsTable.$inferSelect)[];
@@ -26,7 +26,7 @@ const AddAppointmentButton = ({ doctors, patients }: AddAppointmentButtonProps) 
           Novo agendamento
         </Button>
       </DialogTrigger>
-      <UpsertAppointmentForm 
+      <AddAppointmentForm 
         isOpen={isOpen} 
         doctors={doctors} 
         patients={patients} 

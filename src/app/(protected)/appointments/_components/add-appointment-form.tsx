@@ -11,7 +11,7 @@ import { NumericFormat } from "react-number-format";
 import { toast } from "sonner";
 import z from "zod";
 
-import { upsertAppointment } from "@/actions/upsert-appointment";
+import { addAppointment } from "@/actions/add-appointment";
 import { Button } from "@/components/ui/button";
 import { Calendar } from "@/components/ui/calendar";
 import {
@@ -38,7 +38,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { appointmentsTable, doctorsTable, patientsTable } from "@/db/schema";
+import { doctorsTable, patientsTable } from "@/db/schema";
 
 const formSchema = z.object({
   patientId: z.string().min(1, { message: "Selecione um paciente" }),
@@ -48,29 +48,27 @@ const formSchema = z.object({
   time: z.string().min(1, { message: "Selecione um horário" }),
 });
 
-interface UpsertAppointmentFormProps {
+interface AddAppointmentFormProps {
   isOpen: boolean;
   doctors: (typeof doctorsTable.$inferSelect)[];
   patients: (typeof patientsTable.$inferSelect)[];
-  appointment?: (typeof appointmentsTable.$inferSelect);
   onSuccess?: () => void;
 }
 
-const UpsertAppointmentForm = ({
+const AddAppointmentForm = ({
   isOpen,
   doctors,
   patients,
   onSuccess,
-  appointment,
-}: UpsertAppointmentFormProps) => {
+}: AddAppointmentFormProps) => {
   const form = useForm<z.infer<typeof formSchema>>({
     shouldUnregister: true,
     resolver: zodResolver(formSchema),
     defaultValues: {
-      patientId: appointment?.patientId ?? "",
-      doctorId: appointment?.doctorId ?? "",
+      patientId: "",
+      doctorId: "",
       appointmentPrice: 0,
-      date: appointment?.date ?? undefined,
+      date: undefined,
       time: "",
     },
   });
@@ -81,14 +79,14 @@ const UpsertAppointmentForm = ({
   useEffect(() => {
     if (isOpen) {
       form.reset({
-        patientId: appointment?.patientId ?? "",
-        doctorId: appointment?.doctorId ?? "",
+        patientId: "",
+        doctorId: "",
         appointmentPrice: 0,
-        date: appointment?.date ?? undefined,
+        date: undefined,
         time: "",
       });
     }
-  }, [isOpen, form, appointment]);
+  }, [isOpen, form]);
 
   // Atualiza o valor da consulta quando o médico é selecionado
   useEffect(() => {
@@ -103,7 +101,7 @@ const UpsertAppointmentForm = ({
     }
   }, [watchedDoctorId, doctors, form]);
 
-  const upsertAppointmentAction = useAction(upsertAppointment, {
+  const addAppointmentAction = useAction(addAppointment, {
     onSuccess: () => {
       toast.success("Agendamento criado com sucesso.");
       onSuccess?.();
@@ -114,9 +112,8 @@ const UpsertAppointmentForm = ({
   });
 
   const onSubmit = (values: z.infer<typeof formSchema>) => {
-    upsertAppointmentAction.execute({
+    addAppointmentAction.execute({
       ...values,
-      id: appointment?.id,
       appointmentPriceInCents: values.appointmentPrice * 100,
     })
   };
@@ -230,7 +227,7 @@ const UpsertAppointmentForm = ({
                         className="data-[empty=true]:text-muted-foreground w-full justify-start text-left font-normal"
                       >
                         <CalendarIcon />
-                        {field.value ? format(field.value, "PPP") : <span>Selecione uma data</span>}
+                        {field.value ? format(field.value, "PPP", { locale: ptBR }) : <span>Selecione uma data</span>}
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
@@ -299,4 +296,4 @@ const UpsertAppointmentForm = ({
   );
 };
 
-export default UpsertAppointmentForm; 
+export default AddAppointmentForm; 

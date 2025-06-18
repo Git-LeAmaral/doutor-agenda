@@ -9,10 +9,10 @@ import { appointmentsTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { actionClient } from "@/lib/next-safe-action";
 
-import { upsertAppointmentSchema } from "./schema";
+import { addAppointmentSchema } from "./schema";
 
-export const upsertAppointment = actionClient
-  .schema(upsertAppointmentSchema)
+export const addAppointment = actionClient
+  .schema(addAppointmentSchema)
   .action(async ({ parsedInput }) => {
     const session = await auth.api.getSession({
       headers: await headers(),
