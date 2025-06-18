@@ -292,7 +292,7 @@ const AddAppointmentForm = ({
                           value={time.label}
                           disabled={!time.available}
                         >
-                          {time.value.slice(0, 5)} {!time.available && "(Ocupado)"}
+                          {time.value.slice(0, 5)} {!time.available && "(Indisponível)"}
                         </SelectItem>
                       ))
                     ) : selectedDate && selectedDoctorId ? (
