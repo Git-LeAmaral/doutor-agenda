@@ -42,6 +42,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { doctorsTable, patientsTable } from "@/db/schema";
+import { cn } from "@/lib/utils";
 
 const formSchema = z.object({
   patientId: z.string().min(1, { message: "Selecione um paciente" }),
@@ -133,6 +134,24 @@ const AddAppointmentForm = ({
       appointmentPriceInCents: values.appointmentPrice * 100,
     })
   };
+
+  const isDateAvailable = (date: Date) => {
+    const selectedDoctor = doctors.find(
+      (doctor) => doctor.id === selectedDoctorId,
+    );
+    if (!selectedDoctor) return false;
+    
+    const dayOfWeek = date.getDay();
+    const isAvailable = (
+      dayOfWeek >= selectedDoctor.availableFromWeekDay &&
+      dayOfWeek <= selectedDoctor.availableToWeekDay
+    );
+    
+    // Debug log
+    console.log(`Data: ${date.toDateString()}, Dia da semana: ${dayOfWeek}, Médico disponível de ${selectedDoctor.availableFromWeekDay} a ${selectedDoctor.availableToWeekDay}, Disponível: ${isAvailable}`);
+    
+    return isAvailable;
+  }
 
   const isDateTimeEnabled = selectedPatientId && selectedDoctorId;
 
@@ -240,19 +259,31 @@ const AddAppointmentForm = ({
                         variant="outline"
                         data-empty={!field.value}
                         disabled={!isDateTimeEnabled}
-                        className="data-[empty=true]:text-muted-foreground w-full justify-start text-left font-normal"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !field.value && "text-muted-foreground"
+                        )}
                       >
-                        <CalendarIcon />
+                        <CalendarIcon className="mr-2 h-4 w-4" />
                         {field.value ? format(field.value, "PPP", { locale: ptBR }) : <span>Selecione uma data</span>}
                       </Button>
                     </FormControl>
                   </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0">
+                  <PopoverContent className="w-auto p-0" align="start">
                     <Calendar 
                       mode="single" 
                       selected={field.value} 
                       onSelect={field.onChange}
-                      disabled={(date) => date < new Date()}
+                      disabled={(date) => {
+                        // Sempre desabilitar datas passadas
+                        if (date < new Date()) return true;
+                        
+                        // Se não há médico selecionado, desabilitar todas as datas
+                        if (!selectedDoctorId) return true;
+                        
+                        // Verificar disponibilidade do médico
+                        return !isDateAvailable(date);
+                      }}
                       initialFocus
                       locale={ptBR}
                     />
@@ -289,10 +320,10 @@ const AddAppointmentForm = ({
                       availableTimes.map((time) => (
                         <SelectItem 
                           key={time.value} 
-                          value={time.label}
+                          value={time.value}
                           disabled={!time.available}
                         >
-                          {time.value.slice(0, 5)} {!time.available && "(Indisponível)"}
+                          {time.label} {!time.available && "(Indisponível)"}
                         </SelectItem>
                       ))
                     ) : selectedDate && selectedDoctorId ? (
