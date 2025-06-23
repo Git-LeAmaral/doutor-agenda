@@ -1,5 +1,7 @@
 "use client"
 
+import "dayjs/locale/pt-br"
+
 import dayjs from "dayjs"
 import { DollarSign } from "lucide-react"
 import { Area, AreaChart, CartesianGrid, XAxis, YAxis } from "recharts"
@@ -15,7 +17,6 @@ import {
   ChartConfig,
   ChartContainer,
   ChartTooltip,
-  ChartTooltipContent,
 } from "@/components/ui/chart"
 import { formatCurrencyInCents } from "@/helpers/currency"
 
@@ -102,37 +103,43 @@ const chartConfig = {
               tickFormatter={(value) => formatCurrencyInCents(value)}
             />
             <ChartTooltip
-              content={
-                <ChartTooltipContent 
-                  formatter={(value, name) => {
-                    if (name === "revenue") {
-                      return (
-                        <>
-                          <div className="h-3 w-3 rounded bg-[#10B981]">
-                            <span className="text-muted-foreground">Faturamento</span>
-                            <span className="font-semibold">{formatCurrencyInCents(Number(value))}</span>
+              content={({ active, payload }) => {
+                if (!active || !payload || payload.length === 0) return null;
+                
+                const data = payload[0].payload;
+                const appointmentsData = payload.find(p => p.dataKey === 'appointments');
+                const revenueData = payload.find(p => p.dataKey === 'revenue');
+                
+                return (
+                  <div className="bg-background border border-border rounded-lg shadow-lg p-3 min-w-[200px]">
+                    <p className="font-semibold text-foreground mb-3 text-center">
+                      {dayjs(data.fullDate).locale('pt-br').format("DD/MM/YYYY (dddd)")}
+                    </p>
+                    <div className="space-y-2">
+                      {appointmentsData && (
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-2">
+                            <div className="h-3 w-3 rounded bg-[#0B68F7]"></div>
+                            <span className="text-muted-foreground text-sm">Agendamentos</span>
                           </div>
-                        </>
-                      )
-                    }
-                    return (
-                      <>
-                        <div className="h-3 w-3 rounded bg-[#0B68F7]">
-                          <span className="text-muted-foreground">Agendamentos</span>
-                          <span className="font-semibold">{value}</span>
+                          <span className="font-semibold text-foreground">{appointmentsData.value}</span>
                         </div>
-                      </>
-                    )
-                  }}
-                  labelFormatter={(label, payload) => {
-                    if (payload && payload[0]) {
-                      return dayjs(payload[0].payload.fullDate).format("DD/MM/YYYY (dddd)")
-                    }
-                    return label;
-                  }}
-
-                />
-              }
+                      )}
+                      {revenueData && (
+                        <div className="flex items-center justify-between gap-4">
+                          <div className="flex items-center gap-2">
+                            <div className="h-3 w-3 rounded bg-[#10B981]"></div>
+                            <span className="text-muted-foreground text-sm">Faturamento</span>
+                          </div>
+                          <span className="font-semibold text-foreground">
+                            {formatCurrencyInCents(Number(revenueData.value))}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                );
+              }}
             />
             
             <Area
