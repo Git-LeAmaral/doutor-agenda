@@ -37,6 +37,7 @@ export const addAppointment = actionClient
         clinicId: session.user.clinic?.id,
         patientId: parsedInput.patientId,
         doctorId: parsedInput.doctorId,
+        appointmentPriceInCents: parsedInput.appointmentPriceInCents,
         date: appointmentDateTime,
       })
       .onConflictDoUpdate({
@@ -44,6 +45,7 @@ export const addAppointment = actionClient
         set: {
           patientId: parsedInput.patientId,
           doctorId: parsedInput.doctorId,
+          appointmentPriceInCents: parsedInput.appointmentPriceInCents,
           date: appointmentDateTime,
         },
       });

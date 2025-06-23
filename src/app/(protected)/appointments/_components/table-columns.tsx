@@ -56,7 +56,7 @@ export const appointmentsTableColumns: ColumnDef<AppointmentWithRelations>[] = [
     header: "Valor",
     cell: (params) => {
       const appointment = params.row.original;
-      const price = appointment.doctor.appointmentPriceInCents / 100;
+      const price = appointment.appointmentPriceInCents / 100;
       return new Intl.NumberFormat("pt-BR", {
         style: "currency",
         currency: "BRL",
