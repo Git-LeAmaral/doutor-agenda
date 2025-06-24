@@ -53,7 +53,7 @@ export default function TopSpecialties({ specialties }: TopSpecialtiesProps) {
           const progressValue = (specialty.appointments / maxAppointments) * 100;
           return (
             
-          <div key={specialty.specialty} className="flex items-center gap-2">
+          <div key={specialty.specialty} className="flex items-center gap-2 mb-3">
               <div className="w-10 h-10 bg-primary/10 flex items-center justify-center rounded-full">
                 <Icon className="w-5 h-5 text-primary" />
               </div>
