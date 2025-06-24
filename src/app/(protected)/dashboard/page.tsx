@@ -21,6 +21,7 @@ import { AppointmentsChart } from "./_components/appointments-chart";
 import { DatePicker } from "./_components/date-picker";
 import StatsCards from "./_components/stats-cards";
 import TopDoctors from "./_components/top-doctors";
+import TopSpecialties from "./_components/top-specialties";
 
 interface DashboardPageProps {
   searchParams: Promise<{
@@ -53,7 +54,7 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
     throw new Error("Invalid date values");
   }
 
-     const [[totalRevenue], [totalAppointments], [totalPatients], [totalDoctors], topDoctors] =
+     const [[totalRevenue], [totalAppointments], [totalPatients], [totalDoctors], topDoctors, topSpecialties] =
      await Promise.all([
        db
          .select({
@@ -112,7 +113,25 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
         .where(eq(doctorsTable.clinicId, session.user.clinic.id))
         .groupBy(doctorsTable.id)
         .orderBy(desc(count(appointmentsTable.id)))
-        .limit(10)
+        .limit(10),
+
+        db
+        .select({
+          specialty: doctorsTable.specialty,
+          appointments: count(appointmentsTable.id),
+        })
+        .from(appointmentsTable)
+        .innerJoin(doctorsTable, eq(appointmentsTable.doctorId, doctorsTable.id))
+        .where(
+          and(
+            eq(doctorsTable.clinicId, session.user.clinic.id),
+            gte(appointmentsTable.date, fromDate),
+            lte(appointmentsTable.date, toDate),
+          ),
+        )
+        .groupBy(doctorsTable.specialty)
+        .orderBy(desc(count(appointmentsTable.id)))
+        .limit(10),
     ]);
 
     const chartStartDate = dayjs().subtract(10, "days").startOf("day").toDate();
@@ -158,6 +177,10 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
         <div className="grid grid-cols-[2.25fr_1fr] gap-4">
           <AppointmentsChart dailyAppointmentsData={dailyAppointmentsData} />
           <TopDoctors doctors={topDoctors} />
+        </div>
+        <div className="grid grid-cols-[2.25fr_1fr] gap-4">
+          {/* Tabela */}
+          <TopSpecialties specialties={topSpecialties} />
         </div>
       </PageContent>
     </PageContainer>
