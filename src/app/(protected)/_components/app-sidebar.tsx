@@ -21,6 +21,24 @@ import {
 } from "@/components/ui/sidebar"
 import { authClient } from "@/lib/auth-client"
 
+// Function to get user initials
+const getUserInitials = (name?: string, email?: string): string => {
+  if (name) {
+    return name
+      .split(' ')
+      .map(word => word.charAt(0))
+      .join('')
+      .toUpperCase()
+      .slice(0, 2);
+  }
+  
+  if (email) {
+    const emailPrefix = email.split('@')[0];
+    return emailPrefix.slice(0, 2).toUpperCase();
+  }
+  
+  return 'US';
+};
 
 // Menu items.
 const items = [
@@ -51,6 +69,10 @@ export function AppSidebar() {
   const session = authClient.useSession();
   const pathname = usePathname();
 
+  const userInitials = getUserInitials(
+    session.data?.user?.name,
+    session.data?.user?.email
+  );
 
   const handleSignOut = async () => {
     await authClient.signOut({
@@ -111,7 +133,7 @@ export function AppSidebar() {
               <DropdownMenuTrigger asChild>
                 <SidebarMenuButton size="lg">
                   <Avatar>
-                    <AvatarFallback>Leandro</AvatarFallback>
+                    <AvatarFallback>{userInitials}</AvatarFallback>
                   </Avatar>
                   <div>
                     <p className="text-m">{session.data?.user?.clinic?.name}</p>
