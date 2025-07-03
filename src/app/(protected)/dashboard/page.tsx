@@ -45,6 +45,10 @@ const DashboardPage = async ({ searchParams }: DashboardPageProps) => {
     redirect("/clinic-form");
   }
 
+  if (!session.user.plan) {
+    redirect("/premium-access");
+  }
+
   const { from, to } = await searchParams;
 
   // Valores padrão caso from e to sejam undefined ou inválidos
