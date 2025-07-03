@@ -5,6 +5,24 @@ import * as RechartsPrimitive from "recharts"
 
 import { cn } from "@/lib/utils"
 
+// Types for tooltip payload
+interface ChartTooltipPayload {
+  value?: number | string
+  name?: string
+  dataKey?: string
+  color?: string
+  fill?: string
+  payload?: Record<string, unknown>
+}
+
+// Types for legend payload
+interface ChartLegendPayload {
+  value?: string
+  type?: string
+  color?: string
+  dataKey?: string
+}
+
 // Format: { THEME_NAME: CSS_SELECTOR }
 const THEMES = { light: "", dark: ".dark" } as const
 
@@ -118,14 +136,20 @@ function ChartTooltipContent({
   color,
   nameKey,
   labelKey,
-}: React.ComponentProps<typeof RechartsPrimitive.Tooltip> &
-  React.ComponentProps<"div"> & {
-    hideLabel?: boolean
-    hideIndicator?: boolean
-    indicator?: "line" | "dot" | "dashed"
-    nameKey?: string
-    labelKey?: string
-  }) {
+}: React.ComponentProps<"div"> & {
+  active?: boolean
+  payload?: ChartTooltipPayload[]
+  label?: string
+  labelFormatter?: (value: string | number, payload: ChartTooltipPayload[]) => React.ReactNode
+  formatter?: (value: string | number, name: string, item: ChartTooltipPayload, index: number, payload: Record<string, unknown>) => React.ReactNode
+  hideLabel?: boolean
+  hideIndicator?: boolean
+  indicator?: "line" | "dot" | "dashed"
+  nameKey?: string
+  labelKey?: string
+  labelClassName?: string
+  color?: string
+}) {
   const { config } = useChart()
 
   const tooltipLabel = React.useMemo(() => {
@@ -141,7 +165,7 @@ function ChartTooltipContent({
         ? config[label as keyof typeof config]?.label || label
         : itemConfig?.label
 
-    if (labelFormatter) {
+    if (labelFormatter && (typeof value === "string" || typeof value === "number")) {
       return (
         <div className={cn("font-medium", labelClassName)}>
           {labelFormatter(value, payload)}
@@ -182,7 +206,7 @@ function ChartTooltipContent({
         {payload.map((item, index) => {
           const key = `${nameKey || item.name || item.dataKey || "value"}`
           const itemConfig = getPayloadConfigFromPayload(config, item, key)
-          const indicatorColor = color || item.payload.fill || item.color
+          const indicatorColor = color || item.payload?.fill || item.color
 
           return (
             <div
@@ -193,7 +217,7 @@ function ChartTooltipContent({
               )}
             >
               {formatter && item?.value !== undefined && item.name ? (
-                formatter(item.value, item.name, item, index, item.payload)
+                formatter(item.value, item.name, item, index, item.payload || {})
               ) : (
                 <>
                   {itemConfig?.icon ? (
@@ -256,11 +280,12 @@ function ChartLegendContent({
   payload,
   verticalAlign = "bottom",
   nameKey,
-}: React.ComponentProps<"div"> &
-  Pick<RechartsPrimitive.LegendProps, "payload" | "verticalAlign"> & {
-    hideIcon?: boolean
-    nameKey?: string
-  }) {
+}: React.ComponentProps<"div"> & {
+  payload?: ChartLegendPayload[]
+  verticalAlign?: "top" | "bottom"
+  hideIcon?: boolean
+  nameKey?: string
+}) {
   const { config } = useChart()
 
   if (!payload?.length) {
