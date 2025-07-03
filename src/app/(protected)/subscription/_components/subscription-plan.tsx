@@ -2,6 +2,7 @@
 
 import {loadStripe} from "@stripe/stripe-js"
 import { Check, Loader2 } from "lucide-react"
+import { useRouter } from "next/navigation"
 import { useAction } from "next-safe-action/hooks"
 
 import { createStripeCheckout } from "@/actions/create-stripe-checkout"
@@ -10,10 +11,12 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription,CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
 
 interface SubscriptionCardProps {
-  active?: boolean
+  active?: boolean;
+  userEmail?: string;
 }
 
-export default function SubscriptionCard({ active = false }: SubscriptionCardProps) {
+export function SubscriptionPlan({ active = false, userEmail }: SubscriptionCardProps) {
+  const router = useRouter();
   const createStripeCheckoutAction = useAction(createStripeCheckout, {
     onSuccess: async ({data}) => {
       if (!process.env.NEXT_PUBLIC_STRIPE_PUBLISHABLE_KEY) {
@@ -42,6 +45,10 @@ export default function SubscriptionCard({ active = false }: SubscriptionCardPro
 
   const handleSubscribeClick = () => {
     createStripeCheckoutAction.execute()
+  };
+
+  const handleManagePlanClick = () => {
+    router.push(`${process.env.NEXT_PUBLIC_STRIPE_CUSTOMER_PORTAL_URL}?prefilled_email=${userEmail}`)
   }
 
   return (
@@ -84,7 +91,7 @@ export default function SubscriptionCard({ active = false }: SubscriptionCardPro
         <Button 
             className="w-full bg-white text-gray-900 border border-gray-300 hover:bg-gray-50" 
             variant="outline"
-            onClick={active ? () => {} : handleSubscribeClick}
+            onClick={active ? handleManagePlanClick : handleSubscribeClick}
             disabled={createStripeCheckoutAction.isExecuting}
           >
             {createStripeCheckoutAction.isExecuting ? (
